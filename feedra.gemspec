@@ -19,8 +19,14 @@ Gem::Specification.new do |s|
      "README.rdoc",
      "Rakefile",
      "VERSION",
+     "feedra.gemspec",
+     "generators/feedra/feedra_generator.rb",
+     "generators/feedra/templates/entry.rb",
+     "generators/feedra/templates/feed.rb",
+     "generators/feedra/templates/migration.rb",
      "lib/feedra.rb",
      "lib/feedra/entry.rb",
+     "lib/feedra/extensions/feedzirra.rb",
      "lib/feedra/feed.rb",
      "spec/feedra_spec.rb",
      "spec/spec_helper.rb",
@@ -30,7 +36,7 @@ Gem::Specification.new do |s|
   s.homepage = %q{http://github.com/technicalpickles/feedra}
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
-  s.rubyforge_project = %q{feedra}
+  s.rubyforge_project = %q{pickles}
   s.rubygems_version = %q{1.3.1}
   s.summary = %q{Simple feed aggregation for Rails.}
   s.test_files = [
@@ -44,8 +50,11 @@ Gem::Specification.new do |s|
     s.specification_version = 2
 
     if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
+      s.add_runtime_dependency(%q<pauldix-feedzirra>, [">= 0"])
     else
+      s.add_dependency(%q<pauldix-feedzirra>, [">= 0"])
     end
   else
+    s.add_dependency(%q<pauldix-feedzirra>, [">= 0"])
   end
 end
