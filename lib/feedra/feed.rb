@@ -3,6 +3,8 @@ module Feedra
 
     def self.included(other)
       other.class_eval do
+        extend ClassMethods
+
         validates_presence_of :feed_url
         has_many :entries, :dependent => :destroy, :order => "published_at DESC, created_at DESC"
         named_scope :stale, lambda {{ :conditions => ['stale_at < ? OR stale_at IS NULL', Time.now] }}
@@ -40,6 +42,35 @@ module Feedra
     def normalized_url
       return url unless url.blank?
       return feed_url unless feed_url.blank?
+    end
+
+    module ClassMethods
+      def self.fetch_stale!
+        stale.each do |feed|
+          feed.fetch!
+        end
+      end
+
+      def fetch!
+        begin
+          feedzirra_feed = Feedzirra::Feed.fetch_and_parse(self.feed_url)
+
+          case feedzirra_feed
+          when Fixnum, nil
+            create_feed_error_from_exception(feedzirra_feed)
+          else
+            feedzirra_feed.sanitize_entries!
+
+            feedzirra_feed.entries.each do |entry|
+              feed_attributes = entry.attributes.merge(:sport => self.sport)
+              entries.create!(feed_attributes) unless entries.find_by_checksum(entry.checksum)
+            end
+          end
+        rescue Exception => ex
+          create_feed_error_from_exception(ex)
+        end
+      end
+
     end
 
   end
