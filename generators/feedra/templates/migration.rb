@@ -11,6 +11,15 @@ class CreateFeedAndEvents < ActiveRecord::Migration
       t.timestamps
     end
 
+    create_table :feed_errors do |t|
+      t.string     :error_type
+      t.string     :message
+      t.text       :trace
+      t.references :feed
+
+      t.timestamps
+    end
+
     create_table :entries do |t|
       t.string :title
       t.string :author
@@ -29,6 +38,7 @@ class CreateFeedAndEvents < ActiveRecord::Migration
  
   def self.down
     drop_table :feeds
+    drop_table :feed_errors
     drop_table :entries
   end
 end

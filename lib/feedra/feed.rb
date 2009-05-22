@@ -7,6 +7,7 @@ module Feedra
 
         validates_presence_of :feed_url
         has_many :entries, :dependent => :destroy, :order => "published_at DESC, created_at DESC"
+        has_many :feed_errors
         named_scope :stale, lambda {{ :conditions => ['stale_at < ? OR stale_at IS NULL', Time.now] }}
         
         before_create :populate_metadata_from_feed
@@ -44,33 +45,36 @@ module Feedra
       return feed_url unless feed_url.blank?
     end
 
+    def fetch!
+      begin
+        feedzirra_feed = Feedzirra::Feed.fetch_and_parse(self.feed_url)
+
+        case feedzirra_feed
+        when Fixnum, nil
+          create_feed_error_from_exception(feedzirra_feed)
+        else
+          feedzirra_feed.sanitize_entries!
+
+          feedzirra_feed.entries.each do |entry|
+            entry_attributes = build_entry_attributes(entry.attributes)
+            entries.create!(entry_attributes) unless entries.find_by_checksum(entry.checksum)
+          end
+        end
+      rescue Exception => ex
+        create_feed_error_from_exception(ex)
+      end
+    end
+
+    def build_entry_attributes(attributes)
+      attributes
+    end
+
     module ClassMethods
-      def self.fetch_stale!
+      def fetch_stale!
         stale.each do |feed|
           feed.fetch!
         end
       end
-
-      def fetch!
-        begin
-          feedzirra_feed = Feedzirra::Feed.fetch_and_parse(self.feed_url)
-
-          case feedzirra_feed
-          when Fixnum, nil
-            create_feed_error_from_exception(feedzirra_feed)
-          else
-            feedzirra_feed.sanitize_entries!
-
-            feedzirra_feed.entries.each do |entry|
-              feed_attributes = entry.attributes.merge(:sport => self.sport)
-              entries.create!(feed_attributes) unless entries.find_by_checksum(entry.checksum)
-            end
-          end
-        rescue Exception => ex
-          create_feed_error_from_exception(ex)
-        end
-      end
-
     end
 
   end

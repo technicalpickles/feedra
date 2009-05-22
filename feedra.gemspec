@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Josh Nichols"]
-  s.date = %q{2009-05-19}
+  s.date = %q{2009-05-22}
   s.email = %q{josh@technicalpickles.com}
   s.extra_rdoc_files = [
     "LICENSE",
@@ -23,6 +23,7 @@ Gem::Specification.new do |s|
      "generators/feedra/feedra_generator.rb",
      "generators/feedra/templates/entry.rb",
      "generators/feedra/templates/feed.rb",
+     "generators/feedra/templates/feed_error.rb",
      "generators/feedra/templates/migration.rb",
      "lib/feedra.rb",
      "lib/feedra/entry.rb",
