@@ -1,3 +1,5 @@
+require 'feedzirra'
+
 module Feedra
   module Feed
 
