@@ -6,7 +6,7 @@ class CreateFeedAndEvents < ActiveRecord::Migration
       t.string :etag
       t.time :last_modified_at
       t.string :feed_url
-      t.time :stale_at
+      t.datetime :stale_at
 
       t.timestamps
     end
