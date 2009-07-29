@@ -1,4 +1,4 @@
-require 'spec'
+
 
 here = File.dirname(__FILE__)
 $LOAD_PATH.unshift here
@@ -9,10 +9,27 @@ require 'activerecord'
 require 'feedra'
 
 ActiveRecord::Migration.verbose = false
+RAILS_ENV = 'test'
 RAILS_ROOT = here
 RAILS_DEFAULT_LOGGER = Logger.new("#{RAILS_ROOT}/test.log") 
 
+require 'spec'
+require 'shoulda/active_record/matchers'
+
+class Feed < ActiveRecord::Base
+  include Feedra::Feed
+end
+
+class Entry < ActiveRecord::Base
+  include Feedra::Entry
+end
+
+class FeedError < ActiveRecord::Base
+end
+
+require 'shoulda'
 Spec::Runner.configure do |config|
+  config.include(Shoulda::ActiveRecord::Matchers)
 
   config.before(:all) do
     FileUtils.mkdir_p "#{here}/migrate"
