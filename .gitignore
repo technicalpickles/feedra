@@ -4,4 +4,4 @@ coverage
 rdoc
 pkg
 spec/*.log
-spec/migrate
+spec/migrate/*
