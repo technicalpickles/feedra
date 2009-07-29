@@ -12,17 +12,19 @@ module Feedra
         has_many :feed_errors
         named_scope :stale, lambda {{ :conditions => ['stale_at < ? OR stale_at IS NULL', Time.now] }}
         
-        before_create :populate_metadata_from_feed
+        #before_create :populate_metadata_from_feed
         before_validation :normalize_feed_url 
       end
     end
 
     def create_feed_error_from_exception(ex)
-      case ex
-      when Fixnum, nil
-        self.feed_errors.create :error_type => ex.class.to_s, :message => ex.to_s
-      else
-        self.feed_errors.create :error_type => ex.class.to_s, :message => ex.message, :trace => ex.backtrace
+      self.feed_errors.create_from_feedzirra_error(ex)
+    end
+
+    def create_entries_from_feedzirra_entries(feedzirra_entries)
+      feedzirra_entries.each do |entry|
+        entry_attributes = build_entry_attributes(entry.attributes)
+        entries.create!(entry_attributes) unless entries.find_by_feedzirra_entry(entry)
       end
     end
 
@@ -57,16 +59,16 @@ module Feedra
         else
           feedzirra_feed.sanitize_entries!
 
-          feedzirra_feed.entries.each do |entry|
-            entry_attributes = build_entry_attributes(entry.attributes)
-            entries.create!(entry_attributes) unless entries.find_by_checksum(entry.checksum)
-          end
+          create_entries_from_feedzirra_entries(feedzirra_feed.entries)
         end
+      rescue NoMethodError
+        raise
       rescue Exception => ex
         create_feed_error_from_exception(ex)
       end
     end
 
+    # hook, in case you need to add anything extra
     def build_entry_attributes(attributes)
       attributes
     end
