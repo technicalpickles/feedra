@@ -25,10 +25,13 @@ class Entry < ActiveRecord::Base
 end
 
 class FeedError < ActiveRecord::Base
+  include Feedra::FeedError
 end
 
 require 'shoulda'
 Spec::Runner.configure do |config|
+  config.mock_with :rr
+  
   config.include(Shoulda::ActiveRecord::Matchers)
 
   config.before(:all) do
